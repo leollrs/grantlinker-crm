@@ -1,0 +1,155 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { CalendarView } from "@/components/common/CalendarView"
+import { MobileCalendarView } from "@/components/common/MobileCalendarView"
+import { Card, CardContent } from "@/components/ui/card"
+import { Plus } from "lucide-react"
+
+interface CalendarEvent {
+  id: string
+  title: string
+  startTime: string | Date
+  endTime: string | Date
+  source: "local" | "google"
+  clientName?: string | null
+  leadName?: string | null
+}
+
+export default function CalendarPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [appointments, setAppointments] = useState<any[]>([])
+  const [googleEvents, setGoogleEvents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+      return
+    }
+
+    if (status === "authenticated") {
+      fetchCalendarData()
+    }
+  }, [status, router])
+
+  async function fetchCalendarData() {
+    try {
+      const [appointmentsRes, googleEventsRes] = await Promise.all([
+        fetch("/api/appointments"),
+        fetch("/api/appointments/google-events"),
+      ])
+
+      const appointmentsData = await appointmentsRes.json()
+      const googleEventsData = await googleEventsRes.json()
+
+      setAppointments(appointmentsData)
+      setGoogleEvents(googleEventsData)
+    } catch (error) {
+      console.error("Failed to fetch calendar data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      if (id.startsWith("google-")) {
+        // Delete Google event - would need API endpoint
+        console.log("Delete Google event:", id)
+      } else {
+        const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" })
+        if (res.ok) {
+          await fetchCalendarData()
+        }
+      }
+    } catch (error) {
+      console.error("Failed to delete:", error)
+    }
+  }
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <p className="text-muted-foreground text-sm">Loading...</p>
+      </div>
+    )
+  }
+
+  const localAppointmentGoogleIds = new Set(
+    appointments.filter((a: any) => a.googleEventId).map((a: any) => a.googleEventId)
+  )
+
+  const localEvents = appointments.map((a: any) => ({
+    id: a.id,
+    title: a.title,
+    startTime: a.startTime,
+    endTime: a.endTime,
+    source: "local" as const,
+  }))
+
+  const mobileLocalEvents = appointments.map((a: any) => ({
+    id: a.id,
+    title: a.title,
+    startTime: a.startTime,
+    endTime: a.endTime,
+    source: "local" as const,
+    clientName: a.client ? `${a.client.firstName} ${a.client.lastName}` : null,
+    leadName: a.lead ? `${a.lead.firstName} ${a.lead.lastName}` : null,
+  }))
+
+  const filteredGoogleEvents = googleEvents.filter(
+    (e: any) => !localAppointmentGoogleIds.has(e.id.replace("google-", ""))
+  )
+
+  const allEvents = [...localEvents, ...filteredGoogleEvents]
+  const allMobileEvents = [...mobileLocalEvents, ...filteredGoogleEvents]
+
+  return (
+    <div className="flex-1 p-4 md:p-6 lg:p-8 pt-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Calendar</h2>
+          <p className="text-sm text-muted-foreground mt-1 hidden md:block">
+            {googleEvents.length > 0
+              ? "Showing local appointments and Google Calendar events"
+              : "Manage your scheduled appointments"
+            }
+          </p>
+        </div>
+        <Link
+          href="/dashboard/appointments/new"
+          className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-all duration-150 shadow-sm"
+        >
+          <Plus className="h-4 w-4" />
+          New Appointment
+        </Link>
+      </div>
+
+      {/* Mobile: Agenda view */}
+      <div className="md:hidden">
+        <MobileCalendarView events={allMobileEvents} onDelete={handleDelete} />
+      </div>
+
+      {/* Desktop: Grid calendar */}
+      <Card className="hidden md:block">
+        <CardContent className="p-4 md:p-6">
+          <CalendarView appointments={allEvents} onDelete={handleDelete} />
+        </CardContent>
+      </Card>
+
+      {/* Mobile FAB */}
+      <Link
+        href="/dashboard/appointments/new"
+        className="md:hidden fixed bottom-6 right-6 z-40 h-14 w-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg shadow-primary/25 active:scale-95 transition-transform duration-150"
+      >
+        <Plus className="h-6 w-6" />
+      </Link>
+    </div>
+  )
+}

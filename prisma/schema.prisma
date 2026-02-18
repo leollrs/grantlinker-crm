@@ -1,0 +1,260 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  leads         Lead[]
+  clients       Client[]
+  appointments  Appointment[]
+  activities    Activity[]
+  conversations Conversation[]
+  metaAccounts  MetaAccount[]
+  metaPages     MetaPage[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  hashedPassword String?
+  image          String?
+  role           String    @default("USER") // ADMIN, USER
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  accounts     Account[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+  activities   Activity[]
+
+  @@index([tenantId])
+}
+
+model Lead {
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  address           String?
+  companyName       String?
+  status            String   @default("NEW") // NEW, CONTACTED, QUALIFIED, LOST, WON
+  source            String?
+  value             Decimal?
+  whatsappNumber    String?
+  instagramUsername  String?
+  messengerId       String?
+
+  convertedClientId String?
+  convertedClient   Client? @relation("ConvertedLead", fields: [convertedClientId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  activities     Activity[]
+  appointments   Appointment[]
+  conversations  Conversation[]
+
+  @@index([tenantId])
+  @@index([email])
+  @@index([phone])
+}
+
+model Client {
+  id                String  @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  address           String?
+  whatsappNumber    String?
+  instagramUsername  String?
+  messengerId       String?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  appointments    Appointment[]
+  activities      Activity[]
+  conversations   Conversation[]
+  convertedLeads  Lead[]         @relation("ConvertedLead")
+
+  @@index([tenantId])
+  @@index([email])
+  @@index([phone])
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  googleEventId String?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([clientId])
+  @@index([leadId])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String // NOTE, CALL, EMAIL, MEETING, STATUS_CHANGE
+  description String
+  metadata    String? // Store extra details
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  phoneNumber   String
+  channel       String   @default("sms") // "sms" | "whatsapp" | "instagram" | "facebook"
+  lastMessageAt DateTime @default(now())
+  unreadCount   Int      @default(0)
+  metaSenderId  String?  // Meta page-scoped user ID (for IG/FB)
+  status        String   @default("active") // "active" | "archived" | "deleted"
+  displayName   String?
+  notes         String?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  leadId   String?
+  lead     Lead?   @relation(fields: [leadId], references: [id])
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  messages  Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, phoneNumber])
+  @@index([tenantId, metaSenderId])
+}
+
+model MetaAccount {
+  id           String    @id @default(cuid())
+  tenantId     String    @unique
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  metaUserId   String
+  accessToken  String
+  tokenExpiry  DateTime?
+  scopes       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  pages        MetaPage[]
+
+  @@index([tenantId])
+}
+
+model MetaPage {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  metaAccountId       String
+  metaAccount         MetaAccount @relation(fields: [metaAccountId], references: [id], onDelete: Cascade)
+  pageId              String   @unique
+  pageName            String
+  pageAccessToken     String
+  igBusinessAccountId String?
+  igUsername           String?
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([pageId])
+}
+
+model Message {
+  id             String  @id @default(cuid())
+  body           String
+  direction      String
+  status         String  @default("sent")
+  twilioSid      String?
+  metaMessageId  String? // Meta message ID (for IG/FB)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+}

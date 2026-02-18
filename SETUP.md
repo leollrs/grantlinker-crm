@@ -35,3 +35,21 @@ rm -rf node_modules .next
 npm install
 npm run dev
 ```
+
+## If the app doesn’t load (blank page, Safari, etc.)
+
+1. **Use the right URL and port**  
+   The dev server runs on **http://localhost:3000**. If you see “Port 3000 is in use… using 3001”, either:
+   - Open **http://localhost:3001** in the browser, or  
+   - Free port 3000 and restart: `lsof -ti :3000 | xargs kill -9` then `npm run dev`.
+
+2. **Try the login page directly**  
+   Open **http://localhost:3000/login**. If that loads but the home page doesn’t, the redirect-from-home fix is in place; you can use /login or /dashboard from there.
+
+3. **Check .env**  
+   In the project root, `.env` should include:
+   - `NEXTAUTH_URL=http://localhost:3000` (same port as the dev server)
+   - `DATABASE_URL="file:./prisma/dev.db"` so the app finds the SQLite DB (path relative to project root).
+
+4. **If you see “Something went wrong”**  
+   Use “Go to login” on the error screen. If the error persists, check the terminal where `npm run dev` is running for stack traces (e.g. Prisma/database errors).
