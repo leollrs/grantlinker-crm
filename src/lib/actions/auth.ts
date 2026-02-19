@@ -33,18 +33,20 @@ export async function registerUser(formData: FormData) {
     const existingTenant = await db.tenant.findUnique({ where: { slug } })
     const finalSlug = existingTenant ? `${slug}-${Date.now()}` : slug
 
-    await db.tenant.create({
+    const tenant = await db.tenant.create({
         data: {
             name: companyName,
             slug: finalSlug,
-            users: {
-                create: {
-                    name,
-                    email,
-                    hashedPassword,
-                    role: "ADMIN",
-                },
-            },
+        },
+    })
+
+    await db.user.create({
+        data: {
+            name,
+            email,
+            hashedPassword,
+            role: "ADMIN",
+            tenantId: tenant.id,
         },
     })
 

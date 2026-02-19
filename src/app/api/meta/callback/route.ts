@@ -10,9 +10,21 @@ import {
   getUserPages,
 } from "@/lib/meta"
 
-const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+function getBaseUrl(request: Request) {
+  const url = new URL(request.url)
+  const forwardedHost = request.headers.get("x-forwarded-host")
+  const forwardedProto = request.headers.get("x-forwarded-proto")
+
+  if (forwardedHost) {
+    const proto = forwardedProto || url.protocol.replace(":", "")
+    return `${proto}://${forwardedHost}`
+  }
+
+  return url.origin
+}
 
 export async function GET(request: Request) {
+  const baseUrl = getBaseUrl(request)
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.redirect(new URL("/login", baseUrl))
@@ -33,7 +45,8 @@ export async function GET(request: Request) {
       new URL(`/dashboard/settings?meta=error&message=${encodeURIComponent(error)}`, baseUrl)
     )
   }
-  if (!code || state !== tenantId) {
+  const stateTenantId = state?.split(":")[0] || null
+  if (!code || !stateTenantId || stateTenantId !== tenantId) {
     return NextResponse.redirect(new URL("/dashboard/settings?meta=error&message=invalid_state", baseUrl))
   }
 
@@ -89,10 +102,13 @@ export async function GET(request: Request) {
             isActive: false,
           },
           update: {
+            tenantId,
+            metaAccountId: account.id,
             pageName: p.pageName,
             pageAccessToken: p.pageAccessToken,
             igBusinessAccountId: p.igBusinessAccountId,
             igUsername: p.igUsername,
+            isActive: false,
           },
         })
         createdPages.push(page)

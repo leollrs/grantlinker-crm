@@ -1,40 +1,51 @@
 import "dotenv/config"
-import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
-
-const prisma = new PrismaClient()
+import { Client } from "pg"
 
 async function main() {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  })
+
+  await client.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    const tenantId = `t_${Date.now()}`
+    const userId = `u_${Date.now()}`
     const hashedPassword = await bcrypt.hash("password123", 10)
 
-    const tenant = await prisma.tenant.create({
-        data: {
-            name: "Acme Corp",
-            slug: "acme",
-            users: {
-                create: {
-                    email: "test@example.com",
-                    name: "Test User",
-                    hashedPassword,
-                    role: "ADMIN",
-                },
-            },
-        },
-    })
+    await client.query(
+      `INSERT INTO "Tenant" ("id", "name", "slug", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, NOW(), NOW())`,
+      [tenantId, "Acme Corp", `acme-${Date.now()}`]
+    )
+
+    await client.query(
+      `INSERT INTO "User" ("id", "email", "name", "hashedPassword", "role", "tenantId", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
+      [userId, "test@example.com", "Test User", hashedPassword, "ADMIN", tenantId]
+    )
+
+    await client.query("COMMIT")
 
     console.log({
-        tenant,
-        user: "test@example.com",
-        password: "password123"
+      tenantId,
+      user: "test@example.com",
+      password: "password123",
     })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    await client.end()
+  }
 }
 
-main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+main().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})
+

@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 
-const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+function getBaseUrl(request: Request) {
+  const url = new URL(request.url)
+  const forwardedHost = request.headers.get("x-forwarded-host")
+  const forwardedProto = request.headers.get("x-forwarded-proto")
+
+  if (forwardedHost) {
+    const proto = forwardedProto || url.protocol.replace(":", "")
+    return `${proto}://${forwardedHost}`
+  }
+
+  return url.origin
+}
 
 export async function GET(request: Request) {
+  const baseUrl = getBaseUrl(request)
   const { searchParams } = new URL(request.url)
   const code = searchParams.get("code")
   const state = searchParams.get("state") // userId
@@ -35,11 +47,20 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL("/dashboard/settings?google=error", baseUrl))
     }
 
-    const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    })
-    const userInfo = await userRes.json()
-    const providerAccountId = userInfo?.id || "google-calendar"
+    let providerAccountId = state
+    try {
+      const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      })
+      if (userRes.ok) {
+        const userInfo = await userRes.json()
+        if (userInfo?.id) {
+          providerAccountId = `google-calendar:${userInfo.id}`
+        }
+      }
+    } catch {
+      // Keep a user-scoped providerAccountId fallback.
+    }
 
     const expiresAt = tokens.expires_in
       ? Math.floor(Date.now() / 1000) + tokens.expires_in
@@ -59,6 +80,7 @@ export async function GET(request: Request) {
         expires_at: expiresAt,
       },
       update: {
+        userId: state,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token ?? undefined,
         expires_at: expiresAt ?? undefined,

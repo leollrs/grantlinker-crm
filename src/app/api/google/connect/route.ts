@@ -2,9 +2,21 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
-const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+function getBaseUrl(request: Request) {
+    const url = new URL(request.url)
+    const forwardedHost = request.headers.get("x-forwarded-host")
+    const forwardedProto = request.headers.get("x-forwarded-proto")
 
-export async function GET() {
+    if (forwardedHost) {
+        const proto = forwardedProto || url.protocol.replace(":", "")
+        return `${proto}://${forwardedHost}`
+    }
+
+    return url.origin
+}
+
+export async function GET(request: Request) {
+    const baseUrl = getBaseUrl(request)
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
         return NextResponse.redirect(new URL("/login", baseUrl))
@@ -14,7 +26,7 @@ export async function GET() {
         client_id: process.env.GOOGLE_CLIENT_ID || "",
         redirect_uri: `${baseUrl}/api/google/callback`,
         response_type: "code",
-        scope: "https://www.googleapis.com/auth/calendar",
+        scope: "openid email profile https://www.googleapis.com/auth/calendar",
         access_type: "offline",
         prompt: "consent",
         state: session.user.id,

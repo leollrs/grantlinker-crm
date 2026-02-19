@@ -2,19 +2,12 @@
 
 ## First-time / after pull
 
-1. **Install dependencies and generate Prisma client**
+1. **Install dependencies**
    ```bash
    rm -rf node_modules .next
    npm install
    ```
-   `postinstall` runs `prisma generate` automatically.
-
-2. **Ensure database is in sync** (optional; already done if you had `prisma/dev.db`)
-   ```bash
-   npm run db:push
-   ```
-
-3. **Start the dev server**
+2. **Start the dev server**
    ```bash
    npm run dev
    ```
@@ -23,10 +16,8 @@
 ## Handy scripts
 
 - `npm run dev` — start Next.js dev server
-- `npm run db:generate` — regenerate Prisma client after schema changes
-- `npm run db:push` — push schema to the database (no migrations)
 
-## If you see "command not found" for next or prisma
+## If you see "command not found" for next
 
 Make sure install finished without errors and no other terminal is running `npm install` or deleting `node_modules`. Then run:
 
@@ -49,7 +40,7 @@ npm run dev
 3. **Check .env**  
    In the project root, `.env` should include:
    - `NEXTAUTH_URL=http://localhost:3000` (same port as the dev server)
-   - `DATABASE_URL="file:./prisma/dev.db"` so the app finds the SQLite DB (path relative to project root).
+   - `DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true&uselibpqcompat=true&sslmode=require"`
 
 4. **If you see “Something went wrong”**  
-   Use “Go to login” on the error screen. If the error persists, check the terminal where `npm run dev` is running for stack traces (e.g. Prisma/database errors).
+   Use “Go to login” on the error screen. If the error persists, check the terminal where `npm run dev` is running for stack traces (e.g. PostgreSQL connection/query errors).

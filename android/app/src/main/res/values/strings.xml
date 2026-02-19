@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Grantlinker CRM</string>
+    <string name="title_activity_main">Grantlinker CRM</string>
+    <string name="package_name">com.grantlinker.crm</string>
+    <string name="custom_url_scheme">com.grantlinker.crm</string>
+</resources>

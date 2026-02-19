@@ -7,8 +7,8 @@ This CRM foundation is a multi-tenant web application designed for small service
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
 - **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Auth**: NextAuth.js (v4) with Prisma Adapter
+- **Data Access**: `pg` (direct SQL via a shared DB client)
+- **Auth**: NextAuth.js (v4) with JWT sessions
 - **Styling**: Tailwind CSS + shadcn/ui components
 
 ## Multi-Tenancy Strategy
@@ -20,9 +20,9 @@ Every core entity (`User`, `Lead`, `Client`, `Appointment`, `Activity`) has a `t
 ## Project Structure
 - `/src/app`: App Router pages and API routes.
 - `/src/components`: UI components (Button, Card, etc.) and feature-specific components.
-- `/src/lib`: Utility functions, Prisma singleton (`db.ts`), and Auth config.
+- `/src/lib`: Utility functions, PostgreSQL client (`db.ts`), and Auth config.
 - `/src/lib/actions`: Server Actions for data mutation (Leads, Clients, etc.).
-- `/prisma`: Database schema and migrations.
+- `/prisma`: Legacy schema reference files.
 
 ## Scalability
 - The shared database approach handles thousands of tenants efficiently.

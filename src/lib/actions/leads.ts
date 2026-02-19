@@ -210,13 +210,18 @@ export async function convertLeadToClient(leadId: string, force = false) {
         // Transfer appointments from lead to client
         await db.appointment.updateMany({
             where: { leadId, tenantId: session.user.tenantId },
-            data: { clientId: client.id },
+            data: { clientId: client.id, leadId: null },
+        })
+
+        // Remove lead after successful conversion
+        await db.lead.delete({
+            where: { id: leadId, tenantId: session.user.tenantId },
         })
 
         await logActivity(
             `Converted lead to client: ${lead.firstName} ${lead.lastName}`,
             "STATUS_CHANGE",
-            { leadId, clientId: client.id }
+            { clientId: client.id }
         )
 
         revalidatePath("/dashboard/leads")
@@ -233,10 +238,10 @@ export async function linkLeadToClient(leadId: string, clientId: string) {
     if (!session?.user?.tenantId) return { error: "Unauthorized" }
 
     try {
-        await db.lead.update({
-            where: { id: leadId },
-            data: { status: "WON", convertedClientId: clientId },
+        const lead = await db.lead.findFirst({
+            where: { id: leadId, tenantId: session.user.tenantId },
         })
+        if (!lead) return { error: "Lead not found" }
 
         // Transfer conversations
         await db.conversation.updateMany({
@@ -247,13 +252,18 @@ export async function linkLeadToClient(leadId: string, clientId: string) {
         // Transfer appointments
         await db.appointment.updateMany({
             where: { leadId, tenantId: session.user.tenantId },
-            data: { clientId },
+            data: { clientId, leadId: null },
+        })
+
+        // Remove lead after linking to existing client
+        await db.lead.delete({
+            where: { id: leadId, tenantId: session.user.tenantId },
         })
 
         await logActivity(
-            `Linked lead to existing client`,
+            `Linked lead to existing client: ${lead.firstName} ${lead.lastName}`,
             "STATUS_CHANGE",
-            { leadId, clientId }
+            { clientId }
         )
 
         revalidatePath("/dashboard/leads")

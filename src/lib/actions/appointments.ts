@@ -171,13 +171,18 @@ export async function createAppointment(formData: FormData) {
                 // Transfer existing lead appointments to client
                 await db.appointment.updateMany({
                     where: { leadId, tenantId: session.user.tenantId },
-                    data: { clientId: newClient.id },
+                    data: { clientId: newClient.id, leadId: null },
+                })
+
+                // Remove lead after successful conversion
+                await db.lead.delete({
+                    where: { id: leadId, tenantId: session.user.tenantId },
                 })
 
                 await logActivity(
                     `Auto-converted lead to client (appointment booked): ${lead.firstName} ${lead.lastName}`,
                     "STATUS_CHANGE",
-                    { leadId, clientId: newClient.id }
+                    { clientId: newClient.id }
                 )
 
                 resolvedClientId = newClient.id
@@ -188,6 +193,7 @@ export async function createAppointment(formData: FormData) {
     }
 
     try {
+        const finalLeadId = resolvedClientId ? null : (leadId || null)
         const appointment = await db.appointment.create({
             data: {
                 title,
@@ -195,7 +201,7 @@ export async function createAppointment(formData: FormData) {
                 startTime: new Date(startTime),
                 endTime: new Date(endTime),
                 clientId: resolvedClientId,
-                leadId: leadId || null,
+                leadId: finalLeadId,
                 userId: session.user.id,
                 tenantId: session.user.tenantId
             }

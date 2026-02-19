@@ -27,14 +27,10 @@ NEXTAUTH_URL="https://your-crm-app.vercel.app" # Or localhost for dev
 4. Deploy.
 
 ### 4. Post-Deployment
-Run database migrations (automatically handled during build if configured, or manually via local CLI pointing to production DB):
-```bash
-npx prisma migrate deploy
-```
+Ensure the required tables and indexes exist in your PostgreSQL database before deploying app traffic. This project now uses direct SQL via `pg` (no Prisma migration step).
 
 ## Local Development
 1. Clone repo.
 2. `npm install`
 3. Set up `.env` with a local or cloud DB URL.
-4. `npx prisma generate`
-5. `npm run dev`
+4. `npm run dev`

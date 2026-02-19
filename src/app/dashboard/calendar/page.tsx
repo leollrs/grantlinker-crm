@@ -146,7 +146,8 @@ export default function CalendarPage() {
       {/* Mobile FAB */}
       <Link
         href="/dashboard/appointments/new"
-        className="md:hidden fixed bottom-6 right-6 z-40 h-14 w-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg shadow-primary/25 active:scale-95 transition-transform duration-150"
+        className="md:hidden fixed right-6 z-40 h-14 w-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg shadow-primary/25 active:scale-95 transition-transform duration-150"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
       >
         <Plus className="h-6 w-6" />
       </Link>

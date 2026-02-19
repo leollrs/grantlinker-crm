@@ -2,10 +2,23 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
-const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
 const META_APP_ID = process.env.META_APP_ID || ""
 
-export async function GET() {
+function getBaseUrl(request: Request) {
+  const url = new URL(request.url)
+  const forwardedHost = request.headers.get("x-forwarded-host")
+  const forwardedProto = request.headers.get("x-forwarded-proto")
+
+  if (forwardedHost) {
+    const proto = forwardedProto || url.protocol.replace(":", "")
+    return `${proto}://${forwardedHost}`
+  }
+
+  return url.origin
+}
+
+export async function GET(request: Request) {
+  const baseUrl = getBaseUrl(request)
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.redirect(new URL("/login", baseUrl))
@@ -22,7 +35,7 @@ export async function GET() {
     client_id: META_APP_ID,
     redirect_uri: redirectUri,
     scope,
-    state: tenantId,
+    state: `${tenantId}:${session.user.id}`,
   })
 
   return NextResponse.redirect(`https://www.facebook.com/v21.0/dialog/oauth?${params.toString()}`)

@@ -89,7 +89,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     const handleConversationUpdated = useCallback(() => router.refresh(), [router])
 
     return (
-        <div className="flex h-full">
+        <div className="flex h-full overflow-x-hidden">
             {/* Conversation list — 360px on desktop */}
             <div className={`w-full md:w-[360px] flex-shrink-0 flex flex-col bg-white dark:bg-neutral-900 border-r border-border/30 ${
                 selectedId ? "hidden md:flex" : "flex"

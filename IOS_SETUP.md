@@ -94,7 +94,7 @@ Make sure your deployed Next.js app has these environment variables set:
 
 2. **Authentication**: NextAuth requires server-side session handling. Ensure your deployment supports this.
 
-3. **Database**: Your SQLite database needs to be accessible from your deployed server. Consider migrating to PostgreSQL or another cloud database for production.
+3. **Database**: Use a hosted PostgreSQL database (for example Supabase) that is accessible from your deployed server.
 
 4. **CORS**: If you need to access the API from different origins, configure CORS in your API routes.
 

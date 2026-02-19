@@ -7,8 +7,6 @@ import bcrypt from "bcryptjs"
 import GoogleProvider from "next-auth/providers/google"
 
 export const authOptions: NextAuthOptions = {
-    // Removed PrismaAdapter - using JWT strategy doesn't need it
-    // adapter: PrismaAdapter(db) as any,
     session: {
         strategy: "jwt",
     },
@@ -74,7 +72,7 @@ export const authOptions: NextAuthOptions = {
             if (token && session.user) {
                 // Add tenantId to session
                 (session.user as any).tenantId = token.tenantId
-                session.user.id = token.id as string
+                session.user.id = (token.id as string) || (token.sub as string)
             }
             return session
         },
@@ -82,6 +80,20 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.tenantId = (user as any).tenantId
                 token.id = user.id
+            } else if (!token.tenantId || !token.id) {
+                const lookupEmail = token.email
+                if (lookupEmail) {
+                    const existing = await db.user.findUnique({
+                        where: { email: lookupEmail },
+                        select: { id: true, tenantId: true },
+                    })
+                    if (existing) {
+                        token.id = existing.id
+                        token.tenantId = existing.tenantId
+                    }
+                } else if (!token.id && token.sub) {
+                    token.id = token.sub
+                }
             }
             return token
         },

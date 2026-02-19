@@ -16,6 +16,10 @@ tsconfig.tsbuildinfo
 .env.*
 *.local
 
+# local database artifacts
+prisma/*.db
+prisma/*.db-*
+
 # logs
 npm-debug.log*
 yarn-debug.log*

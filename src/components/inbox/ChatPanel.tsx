@@ -187,7 +187,10 @@ function Composer({ onSend, sending }: { onSend: (text: string) => void; sending
     useEffect(() => { inputRef.current?.focus() }, [])
 
     return (
-        <div className="shrink-0 bg-white dark:bg-neutral-900 border-t border-border/40 px-4 py-3">
+        <div
+            className="shrink-0 bg-white dark:bg-neutral-900 border-t border-border/40 px-4 py-3"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+        >
             <div className="flex items-end gap-2">
                 <button
                     type="button"

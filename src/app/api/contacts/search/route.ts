@@ -17,8 +17,7 @@ export async function GET(req: Request) {
         return NextResponse.json([])
     }
 
-    // SQLite LIKE is case-insensitive for ASCII
-    const pattern = `%${q}%`
+    // Case-insensitive partial matching is handled via ILIKE in the DB layer.
 
     const [leads, clients] = await Promise.all([
         db.lead.findMany({
