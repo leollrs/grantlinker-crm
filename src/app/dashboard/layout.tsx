@@ -7,7 +7,7 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="min-h-dvh relative overflow-x-hidden">
+        <div className="min-h-dvh relative overflow-x-hidden w-full max-w-full">
             {/* Desktop sidebar */}
             <div className="hidden h-full lg:flex lg:w-60 lg:flex-col lg:fixed lg:inset-y-0 z-[80]">
                 <Sidebar />
@@ -15,8 +15,7 @@ export default function DashboardLayout({
 
             {/* Mobile top bar */}
             <div
-                className="lg:hidden sticky top-0 z-50 border-b border-border bg-white dark:bg-neutral-900 flex items-center px-4 pt-[env(safe-area-inset-top)]"
-                style={{ minHeight: "calc(3.5rem + env(safe-area-inset-top))" }}
+                className="lg:hidden fixed inset-x-0 top-0 z-50 border-b border-border bg-white dark:bg-neutral-900 flex items-center px-4 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]"
             >
                 <MobileNav />
                 <div className="flex items-center gap-2 ml-3">
@@ -28,7 +27,7 @@ export default function DashboardLayout({
             </div>
 
             {/* Main content */}
-            <main className="lg:pl-60 min-h-dvh">
+            <main className="lg:pl-60 min-h-dvh overflow-x-hidden w-full max-w-full pt-[calc(3.5rem+env(safe-area-inset-top))] lg:pt-0">
                 {children}
             </main>
         </div>
