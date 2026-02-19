@@ -9,6 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { usePageVisibility } from "@/hooks/use-page-visibility"
+import type { NavPageId } from "@/lib/navigation"
+import { RotateCcw } from "lucide-react"
 
 interface SettingsData {
   id: string
@@ -24,6 +27,8 @@ interface SettingsData {
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const userKey = session?.user?.id || session?.user?.email || null
+  const { hideablePages, visiblePageIds, setVisiblePages, resetVisiblePages } = usePageVisibility(userKey)
   const [user, setUser] = useState<SettingsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState("")
@@ -91,6 +96,21 @@ export default function SettingsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  function handleTogglePage(pageId: NavPageId) {
+    const currentlyVisible = visiblePageIds.includes(pageId)
+    if (currentlyVisible && visiblePageIds.length === 1) return
+
+    const nextSet = new Set(visiblePageIds)
+    if (currentlyVisible) nextSet.delete(pageId)
+    else nextSet.add(pageId)
+
+    const orderedIds = hideablePages
+      .map((page) => page.id)
+      .filter((id) => nextSet.has(id))
+
+    setVisiblePages(orderedIds)
   }
 
   if (status === "loading" || loading) {
@@ -162,6 +182,46 @@ export default function SettingsPage() {
               </div>
               <ConnectMetaButton isConnected={!!user.metaPage} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Navigation</CardTitle>
+            <CardDescription>Choose which pages appear in your app menu.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              {hideablePages.map((page) => {
+                const checked = visiblePageIds.includes(page.id)
+                const disableUncheck = checked && visiblePageIds.length === 1
+
+                return (
+                  <label
+                    key={page.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 px-3 py-2.5"
+                  >
+                    <span className="text-sm font-medium">{page.label}</span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={disableUncheck}
+                      onChange={() => handleTogglePage(page.id)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                  </label>
+                )
+              })}
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              At least one page must stay visible. Settings always remains visible.
+            </p>
+
+            <Button type="button" variant="outline" onClick={resetVisiblePages} className="gap-2">
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset to default
+            </Button>
           </CardContent>
         </Card>
 

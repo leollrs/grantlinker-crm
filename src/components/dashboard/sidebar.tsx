@@ -6,43 +6,26 @@ import { cn } from "@/lib/utils"
 import { LayoutDashboard, Users, UserSquare, Calendar, CalendarDays, MessageSquare, Settings, LogOut } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { NAV_PAGES } from "@/lib/navigation"
+import { usePageVisibility } from "@/hooks/use-page-visibility"
 
-const routes = [
-    {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        href: "/dashboard",
-    },
-    {
-        label: "Leads",
-        icon: UserSquare,
-        href: "/dashboard/leads",
-    },
-    {
-        label: "Clients",
-        icon: Users,
-        href: "/dashboard/clients",
-    },
-    {
-        label: "Appointments",
-        icon: Calendar,
-        href: "/dashboard/appointments",
-    },
-    {
-        label: "Calendar",
-        icon: CalendarDays,
-        href: "/dashboard/calendar",
-    },
-    {
-        label: "Inbox",
-        icon: MessageSquare,
-        href: "/dashboard/inbox",
-    },
-]
+const ICONS_BY_PAGE_ID = {
+    dashboard: LayoutDashboard,
+    leads: UserSquare,
+    clients: Users,
+    appointments: Calendar,
+    calendar: CalendarDays,
+    inbox: MessageSquare,
+    settings: Settings,
+} as const
 
 export function Sidebar() {
     const pathname = usePathname()
     const { data: session } = useSession()
+    const userKey = session?.user?.id || session?.user?.email || null
+    const { isPageVisible } = usePageVisibility(userKey)
+
+    const routes = NAV_PAGES.filter((page) => isPageVisible(page.id))
 
     const isActive = (href: string) => {
         if (href === "/dashboard") return pathname === "/dashboard"
@@ -63,39 +46,27 @@ export function Sidebar() {
 
             {/* Navigation */}
             <nav className="flex-1 px-3 py-4 space-y-1">
-                {routes.map((route) => (
-                    <Link
-                        key={route.href}
-                        href={route.href}
-                        className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
-                            isActive(route.href)
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
-                        )}
-                    >
-                        <route.icon className={cn(
-                            "h-4 w-4 shrink-0",
-                            isActive(route.href) ? "text-primary" : ""
-                        )} />
-                        {route.label}
-                    </Link>
-                ))}
-                <Link
-                    href="/dashboard/settings"
-                    className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
-                        isActive("/dashboard/settings")
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
-                    )}
-                >
-                    <Settings className={cn(
-                        "h-4 w-4 shrink-0",
-                        isActive("/dashboard/settings") ? "text-primary" : ""
-                    )} />
-                    Settings
-                </Link>
+                {routes.map((route) => {
+                    const Icon = ICONS_BY_PAGE_ID[route.id]
+                    return (
+                        <Link
+                            key={route.href}
+                            href={route.href}
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+                                isActive(route.href)
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                    : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                            )}
+                        >
+                            <Icon className={cn(
+                                "h-4 w-4 shrink-0",
+                                isActive(route.href) ? "text-primary" : ""
+                            )} />
+                            {route.label}
+                        </Link>
+                    )
+                })}
             </nav>
 
             {/* User section */}

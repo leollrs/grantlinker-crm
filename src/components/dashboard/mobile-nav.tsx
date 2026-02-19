@@ -7,21 +7,26 @@ import { cn } from "@/lib/utils"
 import { Menu, X, LayoutDashboard, Users, UserSquare, Calendar, CalendarDays, MessageSquare, Settings, LogOut } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { NAV_PAGES } from "@/lib/navigation"
+import { usePageVisibility } from "@/hooks/use-page-visibility"
 
-const routes = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Leads", icon: UserSquare, href: "/dashboard/leads" },
-    { label: "Clients", icon: Users, href: "/dashboard/clients" },
-    { label: "Appointments", icon: Calendar, href: "/dashboard/appointments" },
-    { label: "Calendar", icon: CalendarDays, href: "/dashboard/calendar" },
-    { label: "Inbox", icon: MessageSquare, href: "/dashboard/inbox" },
-    { label: "Settings", icon: Settings, href: "/dashboard/settings" },
-]
+const ICONS_BY_PAGE_ID = {
+    dashboard: LayoutDashboard,
+    leads: UserSquare,
+    clients: Users,
+    appointments: Calendar,
+    calendar: CalendarDays,
+    inbox: MessageSquare,
+    settings: Settings,
+} as const
 
 export function MobileNav() {
     const [open, setOpen] = useState(false)
     const pathname = usePathname()
     const { data: session } = useSession()
+    const userKey = session?.user?.id || session?.user?.email || null
+    const { isPageVisible } = usePageVisibility(userKey)
+    const routes = NAV_PAGES.filter((page) => isPageVisible(page.id))
 
     const isActive = (href: string) => {
         if (href === "/dashboard") return pathname === "/dashboard"
@@ -42,25 +47,28 @@ export function MobileNav() {
                     <div className="fixed inset-0 z-40 bg-black/40 [top:calc(3.5rem+env(safe-area-inset-top))]" onClick={() => setOpen(false)} />
                     <div className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-white dark:bg-neutral-900 border-r border-border shadow-xl animate-in slide-in-from-left duration-200 [top:calc(3.5rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
                         <nav className="px-3 py-4 space-y-1">
-                            {routes.map((route) => (
-                                <Link
-                                    key={route.href}
-                                    href={route.href}
-                                    onClick={() => setOpen(false)}
-                                    className={cn(
-                                        "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-150 min-h-[44px]",
-                                        isActive(route.href)
-                                            ? "bg-accent text-accent-foreground"
-                                            : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
-                                    )}
-                                >
-                                    <route.icon className={cn(
-                                        "h-4 w-4 shrink-0",
-                                        isActive(route.href) ? "text-primary" : ""
-                                    )} />
-                                    {route.label}
-                                </Link>
-                            ))}
+                            {routes.map((route) => {
+                                const Icon = ICONS_BY_PAGE_ID[route.id]
+                                return (
+                                    <Link
+                                        key={route.href}
+                                        href={route.href}
+                                        onClick={() => setOpen(false)}
+                                        className={cn(
+                                            "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-150 min-h-[44px]",
+                                            isActive(route.href)
+                                                ? "bg-accent text-accent-foreground"
+                                                : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                                        )}
+                                    >
+                                        <Icon className={cn(
+                                            "h-4 w-4 shrink-0",
+                                            isActive(route.href) ? "text-primary" : ""
+                                        )} />
+                                        {route.label}
+                                    </Link>
+                                )
+                            })}
                         </nav>
 
                         <div className="absolute bottom-0 left-0 right-0 px-3 py-3 border-t border-border">
