@@ -9,6 +9,7 @@ import {
 } from "@/lib/navigation"
 
 const STORAGE_PREFIX = "crm:visible-pages:"
+const PAGE_VISIBILITY_EVENT = "crm:page-visibility-updated"
 const HIDEABLE_PAGE_ID_SET = new Set(HIDEABLE_NAV_PAGES.map((page) => page.id))
 
 function isHideablePageId(id: unknown): id is HideableNavPageId {
@@ -48,6 +49,39 @@ export function usePageVisibility(userKey: string | null | undefined) {
     }
   }, [storageKey])
 
+  useEffect(() => {
+    if (!storageKey || typeof window === "undefined") return
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey) return
+      if (!event.newValue) {
+        setVisiblePageIds(DEFAULT_VISIBLE_PAGE_IDS)
+        return
+      }
+      try {
+        setVisiblePageIds(sanitizePageIds(JSON.parse(event.newValue)))
+      } catch {
+        setVisiblePageIds(DEFAULT_VISIBLE_PAGE_IDS)
+      }
+    }
+
+    const onVisibilityEvent = (event: Event) => {
+      const custom = event as CustomEvent<{
+        key: string
+        ids: HideableNavPageId[]
+      }>
+      if (!custom.detail || custom.detail.key !== storageKey) return
+      setVisiblePageIds(sanitizePageIds(custom.detail.ids))
+    }
+
+    window.addEventListener("storage", onStorage)
+    window.addEventListener(PAGE_VISIBILITY_EVENT, onVisibilityEvent)
+    return () => {
+      window.removeEventListener("storage", onStorage)
+      window.removeEventListener(PAGE_VISIBILITY_EVENT, onVisibilityEvent)
+    }
+  }, [storageKey])
+
   const setVisiblePages = useCallback(
     (nextIds: HideableNavPageId[]) => {
       const sanitized = sanitizePageIds(nextIds)
@@ -55,6 +89,11 @@ export function usePageVisibility(userKey: string | null | undefined) {
 
       if (!storageKey || typeof window === "undefined") return
       window.localStorage.setItem(storageKey, JSON.stringify(sanitized))
+      window.dispatchEvent(
+        new CustomEvent(PAGE_VISIBILITY_EVENT, {
+          detail: { key: storageKey, ids: sanitized },
+        })
+      )
     },
     [storageKey]
   )
