@@ -4,25 +4,28 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   DEFAULT_VISIBLE_PAGE_IDS,
   HIDEABLE_NAV_PAGES,
+  type HideableNavPageId,
   type NavPageId,
 } from "@/lib/navigation"
 
 const STORAGE_PREFIX = "crm:visible-pages:"
 const HIDEABLE_PAGE_ID_SET = new Set(HIDEABLE_NAV_PAGES.map((page) => page.id))
 
-function sanitizePageIds(value: unknown): NavPageId[] {
+function isHideablePageId(id: unknown): id is HideableNavPageId {
+  return typeof id === "string" && HIDEABLE_PAGE_ID_SET.has(id as HideableNavPageId)
+}
+
+function sanitizePageIds(value: unknown): HideableNavPageId[] {
   if (!Array.isArray(value)) return DEFAULT_VISIBLE_PAGE_IDS
 
-  const filtered = value.filter(
-    (id): id is NavPageId => typeof id === "string" && HIDEABLE_PAGE_ID_SET.has(id as NavPageId)
-  )
+  const filtered = value.filter(isHideablePageId)
 
   const unique = [...new Set(filtered)]
   return unique.length > 0 ? unique : DEFAULT_VISIBLE_PAGE_IDS
 }
 
 export function usePageVisibility(userKey: string | null | undefined) {
-  const [visiblePageIds, setVisiblePageIds] = useState<NavPageId[]>(DEFAULT_VISIBLE_PAGE_IDS)
+  const [visiblePageIds, setVisiblePageIds] = useState<HideableNavPageId[]>(DEFAULT_VISIBLE_PAGE_IDS)
 
   const storageKey = useMemo(() => {
     if (!userKey) return null
@@ -46,7 +49,7 @@ export function usePageVisibility(userKey: string | null | undefined) {
   }, [storageKey])
 
   const setVisiblePages = useCallback(
-    (nextIds: NavPageId[]) => {
+    (nextIds: HideableNavPageId[]) => {
       const sanitized = sanitizePageIds(nextIds)
       setVisiblePageIds(sanitized)
 

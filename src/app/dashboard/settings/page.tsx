@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { usePageVisibility } from "@/hooks/use-page-visibility"
-import type { NavPageId } from "@/lib/navigation"
+import type { HideableNavPageId } from "@/lib/navigation"
 import { RotateCcw } from "lucide-react"
 
 interface SettingsData {
@@ -98,7 +98,7 @@ export default function SettingsPage() {
     }
   }
 
-  function handleTogglePage(pageId: NavPageId) {
+  function handleTogglePage(pageId: HideableNavPageId) {
     const currentlyVisible = visiblePageIds.includes(pageId)
     if (currentlyVisible && visiblePageIds.length === 1) return
 

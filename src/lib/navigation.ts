@@ -10,8 +10,15 @@ export const NAV_PAGES = [
 
 export type NavPageId = (typeof NAV_PAGES)[number]["id"]
 
-export const HIDEABLE_NAV_PAGES = NAV_PAGES.filter((page) => page.hideable)
+export type HideableNavPage = Extract<(typeof NAV_PAGES)[number], { hideable: true }>
+export type HideableNavPageId = HideableNavPage["id"]
 
-export const DEFAULT_VISIBLE_PAGE_IDS = HIDEABLE_NAV_PAGES.map(
+function isHideablePage(page: (typeof NAV_PAGES)[number]): page is HideableNavPage {
+  return page.hideable
+}
+
+export const HIDEABLE_NAV_PAGES = NAV_PAGES.filter(isHideablePage)
+
+export const DEFAULT_VISIBLE_PAGE_IDS: HideableNavPageId[] = HIDEABLE_NAV_PAGES.map(
   (page) => page.id
-) as NavPageId[]
+)
