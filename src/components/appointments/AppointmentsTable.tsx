@@ -37,7 +37,7 @@ export function AppointmentsTable({ appointments }: { appointments: AppointmentD
                     {appointments.length === 0 ? (
                         <p className="text-sm text-muted-foreground p-6 pt-0 text-center">No appointments scheduled.</p>
                     ) : (
-                        <div className="relative w-full overflow-auto">
+                        <div className="relative w-full min-w-0 max-w-full overflow-auto">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/40">

@@ -67,7 +67,7 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 lg:p-8 pt-6">
+    <div className="flex-1 min-w-0 space-y-6 p-4 md:p-6 lg:p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Clients</h2>
@@ -115,7 +115,7 @@ export default function ClientsPage() {
           {/* Desktop table */}
           <Card className="hidden md:block">
             <CardContent className="p-0">
-              <div className="relative w-full overflow-auto">
+              <div className="relative w-full min-w-0 max-w-full overflow-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">

@@ -74,7 +74,7 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className="flex-1 p-4 md:p-6 lg:p-8 pt-6 pb-24 md:pb-8">
+    <div className="flex-1 min-w-0 p-4 md:p-6 lg:p-8 pt-6 pb-24 md:pb-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -128,19 +128,35 @@
 }
 
 @layer base {
-  html, body {
+  html {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    /* Prevent iOS from allowing horizontal overflow */
+    overflow-wrap: break-word;
+  }
+  body {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
-  }
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  * {
+    min-width: 0;
+    @apply border-border outline-ring/50;
+  }
+  /* Contain scroll and layout on main scroll containers for iOS */
+  [data-viewport-scroll] {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    max-width: 100%;
   }
 }
 

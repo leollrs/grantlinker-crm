@@ -213,7 +213,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                     {/* Desktop table */}
                     <Card className="hidden md:block">
                         <CardContent className="p-0">
-                            <div className="relative w-full overflow-auto">
+                            <div className="relative w-full min-w-0 max-w-full overflow-auto">
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="border-b bg-muted/40">

@@ -31,7 +31,7 @@ export default function SignUpPage() {
     }
 
     return (
-        <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
+        <div className="flex min-h-dvh min-h-screen w-full max-w-full items-center justify-center bg-background p-4 pt-[max(1rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))]">
             <div className="w-full max-w-sm space-y-6">
                 <div className="text-center space-y-2">
                     <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center mx-auto">

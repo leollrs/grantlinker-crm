@@ -7,7 +7,7 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="min-h-dvh relative overflow-x-hidden w-full max-w-full">
+        <div className="h-dvh lg:min-h-dvh relative overflow-hidden w-full max-w-full min-w-0">
             {/* Desktop sidebar */}
             <div className="hidden h-full lg:flex lg:w-60 lg:flex-col lg:fixed lg:inset-y-0 z-[80]">
                 <Sidebar />
@@ -26,8 +26,11 @@ export default function DashboardLayout({
                 </div>
             </div>
 
-            {/* Main content */}
-            <main className="lg:pl-60 min-h-dvh overflow-x-hidden w-full max-w-full pt-[calc(3.5rem+env(safe-area-inset-top))] lg:pt-0">
+            {/* Main content — safe area insets for iOS notch/home indicator, contain overflow */}
+            <main
+                className="lg:pl-60 w-full max-w-full min-w-0 overflow-x-hidden overflow-y-auto h-[calc(100dvh-(3.5rem+env(safe-area-inset-top)))] lg:h-auto lg:min-h-dvh pt-0 lg:pt-0 mt-[calc(3.5rem+env(safe-area-inset-top))] lg:mt-0 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] lg:pr-0 lg:pb-0"
+                data-viewport-scroll
+            >
                 {children}
             </main>
         </div>

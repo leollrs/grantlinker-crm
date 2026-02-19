@@ -39,8 +39,8 @@ export function MobileNav() {
 
             {open && (
                 <>
-                    <div className="fixed inset-0 top-14 z-40 bg-black/40" onClick={() => setOpen(false)} />
-                    <div className="fixed inset-y-0 left-0 top-14 z-50 w-72 bg-white dark:bg-neutral-900 border-r border-border shadow-xl animate-in slide-in-from-left duration-200">
+                    <div className="fixed inset-0 z-40 bg-black/40 [top:calc(3.5rem+env(safe-area-inset-top))]" onClick={() => setOpen(false)} />
+                    <div className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-white dark:bg-neutral-900 border-r border-border shadow-xl animate-in slide-in-from-left duration-200 [top:calc(3.5rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
                         <nav className="px-3 py-4 space-y-1">
                             {routes.map((route) => (
                                 <Link

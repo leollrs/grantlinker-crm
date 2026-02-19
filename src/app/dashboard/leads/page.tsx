@@ -73,7 +73,7 @@ export default function LeadsPage() {
   }))
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-6 lg:p-8 pt-6">
+    <div className="flex-1 min-w-0 space-y-4 p-4 md:p-6 lg:p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Leads</h2>

@@ -81,7 +81,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 lg:p-8 pt-6">
+    <div className="flex-1 min-w-0 space-y-6 p-4 md:p-6 lg:p-8 pt-6">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
         <p className="text-sm text-muted-foreground mt-1">Overview of your CRM activity.</p>

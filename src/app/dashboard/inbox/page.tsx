@@ -36,14 +36,14 @@ export default function InboxPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="h-[calc(100dvh-3.5rem)] lg:h-dvh overflow-hidden flex items-center justify-center">
+      <div className="h-full min-h-0 lg:h-dvh overflow-hidden flex items-center justify-center">
         <p className="text-muted-foreground text-sm">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="h-[calc(100dvh-3.5rem)] lg:h-dvh overflow-hidden">
+    <div className="h-full min-h-0 lg:h-dvh overflow-hidden w-full max-w-full">
       <InboxClient initialConversations={conversations} />
     </div>
   )
