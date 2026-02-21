@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { GoogleEventNotifications } from "@/components/dashboard/GoogleEventNotifications"
 import { UpcomingAppointments } from "@/components/dashboard/UpcomingAppointments"
 import { Users, UserPlus, Calendar } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_APPOINTMENTS, MOCK_DASHBOARD_STATS } from "@/lib/ui-mocks"
 
 interface DashboardStats {
   leads: number
@@ -36,8 +38,34 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
+      return
+    }
+
+    if (UI_ONLY_MODE) {
+      setStats(MOCK_DASHBOARD_STATS)
+      setUpcoming(
+        MOCK_APPOINTMENTS.map((apt) => ({
+          id: apt.id,
+          title: apt.title,
+          description: apt.description,
+          startTime: apt.startTime,
+          endTime: apt.endTime,
+          status: apt.status,
+          clientId: apt.clientId,
+          leadId: apt.leadId,
+          client: apt.clientName
+            ? {
+                firstName: apt.clientName.split(" ")[0] || apt.clientName,
+                lastName: apt.clientName.split(" ").slice(1).join(" "),
+              }
+            : null,
+          lead: null,
+        }))
+      )
+      setNewGoogleEvents([])
+      setLoading(false)
       return
     }
 
@@ -68,7 +96,7 @@ export default function Dashboard() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if ((!UI_ONLY_MODE && status === "loading") || loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>
@@ -76,7 +104,7 @@ export default function Dashboard() {
     )
   }
 
-  if (!session?.user) {
+  if (!UI_ONLY_MODE && !session?.user) {
     return null
   }
 

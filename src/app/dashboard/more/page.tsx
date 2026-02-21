@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { ChevronRight, Home, MessageSquare, Settings, ShieldPlus, Users } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
 
 const items = [
   {
@@ -38,12 +39,12 @@ export default function MorePage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
     }
   }, [status, router])
 
-  if (status === "loading") {
+  if (!UI_ONLY_MODE && status === "loading") {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>

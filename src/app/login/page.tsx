@@ -7,7 +7,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
 
 export default function LoginPage() {
     const router = useRouter()
@@ -24,6 +25,12 @@ export default function LoginPage() {
         setError(null)
 
         try {
+            if (UI_ONLY_MODE) {
+                router.push("/dashboard/appointments")
+                router.refresh()
+                return
+            }
+
             const result = await signIn("credentials", {
                 email,
                 password,
@@ -37,7 +44,7 @@ export default function LoginPage() {
                 router.push("/dashboard/appointments")
                 router.refresh()
             }
-        } catch (err) {
+        } catch {
             setError("An error occurred")
             setIsLoading(false)
         }
@@ -56,6 +63,11 @@ export default function LoginPage() {
                 <Card>
                     <form onSubmit={handleSubmit}>
                         <CardContent className="grid gap-4 pt-6">
+                            {UI_ONLY_MODE && (
+                                <div className="rounded-lg bg-blue-50 text-blue-700 text-sm p-3 ring-1 ring-inset ring-blue-600/20">
+                                    UI-only mode is enabled for design work. Sign-in is bypassed.
+                                </div>
+                            )}
                             {registered && (
                                 <div className="rounded-lg bg-emerald-50 text-emerald-700 text-sm p-3 ring-1 ring-inset ring-emerald-600/20">
                                     Account created successfully. Please sign in.
@@ -90,7 +102,7 @@ export default function LoginPage() {
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
                             <Button className="w-full" type="submit" disabled={isLoading}>
-                                {isLoading ? "Signing in..." : "Sign in"}
+                                {isLoading ? "Signing in..." : UI_ONLY_MODE ? "Open Demo App" : "Sign in"}
                             </Button>
                             <p className="text-sm text-center text-muted-foreground">
                                 Don&apos;t have an account?{" "}

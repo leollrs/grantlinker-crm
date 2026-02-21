@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import { usePageVisibility } from "@/hooks/use-page-visibility"
 import type { HideableNavPageId } from "@/lib/navigation"
 import { RotateCcw } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_SETTINGS } from "@/lib/ui-mocks"
 
 interface SettingsData {
   id: string
@@ -27,7 +29,7 @@ interface SettingsData {
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const userKey = session?.user?.id || session?.user?.email || null
+  const userKey = UI_ONLY_MODE ? "ui-only-user" : session?.user?.id || session?.user?.email || null
   const { hideablePages, visiblePageIds, setVisiblePages, resetVisiblePages } = usePageVisibility(userKey)
   const [user, setUser] = useState<SettingsData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,8 +38,17 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
+      return
+    }
+
+    if (UI_ONLY_MODE) {
+      const data = { ...MOCK_SETTINGS }
+      setUser(data)
+      setName(data.name || "")
+      setTenantName(data.tenant?.name || "")
+      setLoading(false)
       return
     }
 
@@ -64,6 +75,11 @@ export default function SettingsPage() {
     e.preventDefault()
     setSaving(true)
     try {
+      if (UI_ONLY_MODE) {
+        setUser((prev) => (prev ? { ...prev, name } : prev))
+        return
+      }
+
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -83,6 +99,13 @@ export default function SettingsPage() {
     e.preventDefault()
     setSaving(true)
     try {
+      if (UI_ONLY_MODE) {
+        setUser((prev) =>
+          prev ? { ...prev, tenant: { ...prev.tenant, name: tenantName } } : prev
+        )
+        return
+      }
+
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -113,7 +136,7 @@ export default function SettingsPage() {
     setVisiblePages(orderedIds)
   }
 
-  if (status === "loading" || loading) {
+  if ((!UI_ONLY_MODE && status === "loading") || loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>
@@ -169,7 +192,11 @@ export default function SettingsPage() {
                   Sync appointments with Google Calendar.
                 </p>
               </div>
-              <ConnectGoogleButton isConnected={user.accounts.some((a: any) => a.provider === "google-calendar")} />
+              {UI_ONLY_MODE ? (
+                <span className="text-xs rounded-full border border-border px-2 py-1 text-muted-foreground">UI only</span>
+              ) : (
+                <ConnectGoogleButton isConnected={user.accounts.some((a: any) => a.provider === "google-calendar")} />
+              )}
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-muted/30">
               <div className="space-y-1">
@@ -180,7 +207,11 @@ export default function SettingsPage() {
                     : "Send and receive Messenger and Instagram DMs."}
                 </p>
               </div>
-              <ConnectMetaButton isConnected={!!user.metaPage} />
+              {UI_ONLY_MODE ? (
+                <span className="text-xs rounded-full border border-border px-2 py-1 text-muted-foreground">UI only</span>
+              ) : (
+                <ConnectMetaButton isConnected={!!user.metaPage} />
+              )}
             </div>
           </CardContent>
         </Card>

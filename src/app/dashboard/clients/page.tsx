@@ -5,10 +5,10 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { getClients, deleteClient } from "@/lib/actions/clients"
 import { Card, CardContent } from "@/components/ui/card"
-import { DeleteButton } from "@/components/common/DeleteButton"
 import { Plus, ChevronRight } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_CLIENTS } from "@/lib/ui-mocks"
 
 interface Client {
   id: string
@@ -19,14 +19,20 @@ interface Client {
 }
 
 export default function ClientsPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
+      return
+    }
+
+    if (UI_ONLY_MODE) {
+      setClients([...MOCK_CLIENTS])
+      setLoading(false)
       return
     }
 
@@ -48,6 +54,10 @@ export default function ClientsPage() {
   }
 
   async function handleDelete(id: string) {
+    if (UI_ONLY_MODE) {
+      setClients(clients.filter(c => c.id !== id))
+      return
+    }
     try {
       const res = await fetch(`/api/clients/${id}`, { method: "DELETE" })
       if (res.ok) {
@@ -58,7 +68,7 @@ export default function ClientsPage() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if ((!UI_ONLY_MODE && status === "loading") || loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>
@@ -93,7 +103,7 @@ export default function ClientsPage() {
           {/* Mobile card list */}
           <div className="space-y-3 md:hidden">
             {clients.map((client) => (
-              <Link key={client.id} href={`/dashboard/clients/${client.id}`} className="block">
+              <Link key={client.id} href={UI_ONLY_MODE ? "/dashboard/clients" : `/dashboard/clients/${client.id}`} className="block">
                 <Card className="active:scale-[0.99] transition-transform duration-150">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -129,7 +139,7 @@ export default function ClientsPage() {
                     {clients.map((client) => (
                       <tr key={client.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors duration-150">
                         <td className="px-4 py-3">
-                          <Link href={`/dashboard/clients/${client.id}`} className="font-medium hover:text-primary transition-colors duration-150">
+                          <Link href={UI_ONLY_MODE ? "/dashboard/clients" : `/dashboard/clients/${client.id}`} className="font-medium hover:text-primary transition-colors duration-150">
                             {client.firstName} {client.lastName}
                           </Link>
                         </td>
@@ -137,7 +147,7 @@ export default function ClientsPage() {
                         <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{client.phone || "—"}</td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Link href={`/dashboard/clients/${client.id}`}>
+                            <Link href={UI_ONLY_MODE ? "/dashboard/clients" : `/dashboard/clients/${client.id}`}>
                               <Button variant="ghost" size="sm">View</Button>
                             </Link>
                             <Button variant="ghost" size="sm" onClick={() => handleDelete(client.id)}>

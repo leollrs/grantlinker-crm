@@ -6,6 +6,7 @@ import { X, Clock, User, MapPin, FileText, Calendar, Loader2 } from "lucide-reac
 import { format } from "date-fns"
 import { deleteAppointment } from "@/lib/actions/appointments"
 import { useRouter } from "next/navigation"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
 
 interface Appointment {
     id: string
@@ -47,8 +48,9 @@ export function AppointmentDetailModal({
 
     const contactName = appointment.clientName || appointment.leadName
     const contactType = appointment.clientName ? "Client" : appointment.leadName ? "Lead" : null
-    const contactId = appointment.clientId || appointment.leadId
-    const contactHref = appointment.clientId
+    const contactHref = UI_ONLY_MODE
+        ? null
+        : appointment.clientId
         ? `/dashboard/clients/${appointment.clientId}`
         : appointment.leadId
             ? `/dashboard/leads/${appointment.leadId}`
@@ -57,7 +59,7 @@ export function AppointmentDetailModal({
     const isGoogleOnly = appointment.id.startsWith("google-")
 
     function handleDelete() {
-        if (isGoogleOnly) return
+        if (UI_ONLY_MODE || isGoogleOnly) return
         startTransition(async () => {
             await deleteAppointment(appointment.id)
             onClose()
@@ -146,6 +148,8 @@ export function AppointmentDetailModal({
                         <>
                             {isGoogleOnly ? (
                                 <span className="text-xs text-muted-foreground">Google Calendar event</span>
+                            ) : UI_ONLY_MODE ? (
+                                <span className="text-xs text-muted-foreground">UI-only mode</span>
                             ) : (
                                 <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={() => setShowDeleteConfirm(true)}>
                                     Delete

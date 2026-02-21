@@ -8,6 +8,8 @@ import { CalendarView } from "@/components/common/CalendarView"
 import { MobileCalendarView } from "@/components/common/MobileCalendarView"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_APPOINTMENTS } from "@/lib/ui-mocks"
 
 interface CalendarEvent {
   id: string
@@ -20,15 +22,38 @@ interface CalendarEvent {
 }
 
 export default function CalendarPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [appointments, setAppointments] = useState<any[]>([])
   const [googleEvents, setGoogleEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
+      return
+    }
+
+    if (UI_ONLY_MODE) {
+      setAppointments(
+        MOCK_APPOINTMENTS.map((apt) => ({
+          id: apt.id,
+          title: apt.title,
+          startTime: apt.startTime,
+          endTime: apt.endTime,
+          source: "local",
+          client: apt.clientName
+            ? {
+                firstName: apt.clientName.split(" ")[0] || apt.clientName,
+                lastName: apt.clientName.split(" ").slice(1).join(" "),
+              }
+            : null,
+          lead: null,
+          googleEventId: null,
+        }))
+      )
+      setGoogleEvents([])
+      setLoading(false)
       return
     }
 
@@ -72,7 +97,7 @@ export default function CalendarPage() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if ((!UI_ONLY_MODE && status === "loading") || loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>

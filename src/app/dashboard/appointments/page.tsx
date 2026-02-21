@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { AppointmentsList } from "@/components/appointments/AppointmentsList"
 import { Plus, Calendar } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_APPOINTMENTS } from "@/lib/ui-mocks"
 
 interface Appointment {
   id: string
@@ -22,14 +24,20 @@ interface Appointment {
 }
 
 export default function AppointmentsPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
+      return
+    }
+
+    if (UI_ONLY_MODE) {
+      setAppointments([...MOCK_APPOINTMENTS])
+      setLoading(false)
       return
     }
 
@@ -65,7 +73,7 @@ export default function AppointmentsPage() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if ((!UI_ONLY_MODE && status === "loading") || loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>

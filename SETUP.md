@@ -42,5 +42,16 @@ npm run dev
    - `NEXTAUTH_URL=http://localhost:3000` (same port as the dev server)
    - `DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true&uselibpqcompat=true&sslmode=require"`
 
+## UI-only mode (no DB/auth, for frontend work)
+
+If you just need to work on UI and navigation, create `.env.local` with:
+
+```bash
+NEXT_PUBLIC_UI_ONLY_MODE=true
+```
+
+Then run `npm run dev`.  
+This enables mock data and bypasses auth redirects in main dashboard screens.
+
 4. **If you see “Something went wrong”**  
    Use “Go to login” on the error screen. If the error persists, check the terminal where `npm run dev` is running for stack traces (e.g. PostgreSQL connection/query errors).

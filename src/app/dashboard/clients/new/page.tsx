@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
 
 export default function NewClientPage() {
   const router = useRouter()
@@ -27,6 +28,11 @@ export default function NewClientPage() {
     }
 
     try {
+      if (UI_ONLY_MODE) {
+        router.push("/dashboard/clients")
+        return
+      }
+
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

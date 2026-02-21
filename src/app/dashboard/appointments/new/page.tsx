@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
+import { MOCK_CLIENTS, MOCK_LEADS } from "@/lib/ui-mocks"
 
 const selectClass = "flex min-h-[44px] md:min-h-0 h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
 
@@ -19,6 +21,13 @@ export default function NewAppointmentPage() {
   const [fetching, setFetching] = useState(true)
 
   useEffect(() => {
+    if (UI_ONLY_MODE) {
+      setClients([...MOCK_CLIENTS])
+      setLeads([...MOCK_LEADS])
+      setFetching(false)
+      return
+    }
+
     async function fetchData() {
       try {
         const [clientsRes, leadsRes] = await Promise.all([
@@ -53,6 +62,11 @@ export default function NewAppointmentPage() {
     }
 
     try {
+      if (UI_ONLY_MODE) {
+        router.push("/dashboard/appointments")
+        return
+      }
+
       const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

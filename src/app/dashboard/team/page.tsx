@@ -4,18 +4,19 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Users } from "lucide-react"
+import { UI_ONLY_MODE } from "@/lib/ui-only-mode"
 
 export default function TeamPage() {
   const { status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!UI_ONLY_MODE && status === "unauthenticated") {
       router.push("/login")
     }
   }, [status, router])
 
-  if (status === "loading") {
+  if (!UI_ONLY_MODE && status === "loading") {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <p className="text-muted-foreground text-sm">Loading...</p>
