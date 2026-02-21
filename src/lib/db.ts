@@ -13,21 +13,21 @@ type QueryArgs = {
 
 const DATABASE_URL = process.env.DATABASE_URL || ""
 
-if (!DATABASE_URL) {
-  throw new Error("Missing DATABASE_URL")
-}
-
 const globalForPg = globalThis as unknown as { pool?: Pool }
 
-const pool =
-  globalForPg.pool ??
-  new Pool({
-    connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  })
+function getPool() {
+  if (!DATABASE_URL) {
+    throw new Error("Missing DATABASE_URL")
+  }
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPg.pool = pool
+  if (!globalForPg.pool) {
+    globalForPg.pool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    })
+  }
+
+  return globalForPg.pool
 }
 
 const TABLES: Record<string, string> = {
@@ -181,6 +181,7 @@ function applySelect<T extends PlainObject>(row: T, select?: PlainObject): Plain
 }
 
 async function query(sql: string, params: any[] = []) {
+  const pool = getPool()
   return pool.query(sql, params)
 }
 
