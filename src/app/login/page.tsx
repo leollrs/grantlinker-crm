@@ -34,7 +34,7 @@ export default function LoginPage() {
                 setError("Invalid credentials")
                 setIsLoading(false)
             } else {
-                router.push("/dashboard")
+                router.push("/dashboard/appointments")
                 router.refresh()
             }
         } catch (err) {

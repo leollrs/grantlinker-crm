@@ -36,7 +36,7 @@ export function Sidebar() {
         <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
             {/* Logo */}
             <div className="h-14 flex items-center px-6 border-b border-sidebar-border">
-                <Link href="/dashboard" className="flex items-center gap-2">
+                <Link href="/dashboard/appointments" className="flex items-center gap-2">
                     <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
                         <span className="text-primary-foreground text-xs font-bold">C</span>
                     </div>
