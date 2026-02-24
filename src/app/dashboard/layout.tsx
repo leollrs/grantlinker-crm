@@ -17,7 +17,7 @@ export default function DashboardLayout({
 
             {/* Mobile top bar */}
             <div
-                className="lg:hidden fixed inset-x-0 top-0 z-50 border-b border-border bg-white dark:bg-neutral-900 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]"
+                className="lg:hidden fixed inset-x-0 top-0 z-50 border-b border-black/5 bg-white/90 backdrop-blur-[12px] pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))]"
             >
                 <div className="h-14 px-4 flex items-center justify-between">
                     <Link href="/dashboard/appointments" className="flex items-center gap-2">

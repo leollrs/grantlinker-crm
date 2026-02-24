@@ -1,12 +1,12 @@
 "use client"
 
-import { Calendar, dateFnsLocalizer, type View, type NavigateAction } from 'react-big-calendar'
+import { Calendar, dateFnsLocalizer, type View } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { enUS } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useState, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Calendar as CalendarIcon } from 'lucide-react'
+import { X } from 'lucide-react'
 
 const locales = {
     'en-US': enUS,
@@ -72,7 +72,7 @@ export function CalendarView({ appointments, onDelete }: CalendarViewProps) {
         source: apt.source || "local",
     }))
 
-    const handleNavigate = useCallback((newDate: Date, view: View, action: NavigateAction) => {
+    const handleNavigate = useCallback((newDate: Date) => {
         setCurrentDate(newDate)
     }, [])
 
@@ -102,7 +102,7 @@ export function CalendarView({ appointments, onDelete }: CalendarViewProps) {
                 .rbc-toolbar button {
                     padding: 6px 12px;
                     border: 1px solid var(--border);
-                    border-radius: 8px;
+                    border-radius: 10px;
                     background: var(--background);
                     color: var(--foreground);
                     font-size: 13px;
@@ -148,7 +148,7 @@ export function CalendarView({ appointments, onDelete }: CalendarViewProps) {
                     }
                 }
                 .rbc-toolbar-label {
-                    font-weight: 600;
+                    font-weight: 700;
                     font-size: 16px;
                 }
                 .rbc-header {
@@ -188,9 +188,11 @@ export function CalendarView({ appointments, onDelete }: CalendarViewProps) {
                     border-color: var(--border) !important;
                 }
                 .rbc-month-view, .rbc-time-view {
-                    border: 1px solid var(--border) !important;
-                    border-radius: 8px;
+                    border: 1px solid rgba(0,0,0,0.04) !important;
+                    border-radius: 16px;
                     overflow: hidden;
+                    background: #fff;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
                 }
                 .rbc-time-content {
                     border-top: 1px solid var(--border) !important;
@@ -286,7 +288,7 @@ export function CalendarView({ appointments, onDelete }: CalendarViewProps) {
                     onNavigate={handleNavigate}
                     onView={handleViewChange}
                     onSelectEvent={handleSelectEvent}
-                    eventPropGetter={(event: any) => {
+                    eventPropGetter={(event: MappedEvent) => {
                         if (event.source === "google") {
                             return { className: "google-event" }
                         }

@@ -60,7 +60,7 @@ export function MobileTabBar() {
 
   return (
     <>
-      <nav className="lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 pb-[env(safe-area-inset-bottom)]">
+      <nav className="lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-black/5 bg-white/90 backdrop-blur-[12px] supports-[backdrop-filter]:bg-white/90 pb-[env(safe-area-inset-bottom)]">
         <div className="grid h-[5.25rem] grid-cols-5 items-center px-2">
           {leftTabs.map((tab) => {
             const Icon = tab.icon
@@ -73,7 +73,7 @@ export function MobileTabBar() {
                   isTabActive(pathname, tab.href) ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 <span>{tab.label}</span>
               </Link>
             )
@@ -85,8 +85,8 @@ export function MobileTabBar() {
             aria-label="Quick add"
             className="flex flex-col items-center justify-center gap-1 text-[0.65rem] leading-none font-medium text-muted-foreground"
           >
-            <span className="relative -mt-6 h-14 w-14 rounded-full bg-primary text-primary-foreground border-4 border-background shadow-lg shadow-primary/20 flex items-center justify-center active:scale-95 transition-transform duration-150">
-              <Plus className="h-6 w-6" />
+            <span className="relative -mt-8 h-16 w-16 rounded-[20px] bg-primary text-primary-foreground border border-primary/20 shadow-[0_12px_30px_rgba(37,99,235,0.35)] flex items-center justify-center active:scale-95 transition-transform duration-150">
+              <Plus className="h-7 w-7" />
             </span>
             <span>Add</span>
           </button>
@@ -102,7 +102,7 @@ export function MobileTabBar() {
                   isTabActive(pathname, tab.href) ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 <span>{tab.label}</span>
               </Link>
             )
@@ -118,7 +118,7 @@ export function MobileTabBar() {
             className="lg:hidden fixed inset-0 z-[70] bg-black/40"
             onClick={() => setOpen(false)}
           />
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-[80] rounded-t-2xl border-t border-border bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl">
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-[80] rounded-t-2xl border-t border-black/5 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-12px_30px_rgba(0,0,0,0.08)]">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/30" />
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">Quick Add</h3>
