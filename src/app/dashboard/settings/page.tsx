@@ -44,7 +44,12 @@ export default function SettingsPage() {
     }
 
     if (UI_ONLY_MODE) {
-      const data = { ...MOCK_SETTINGS }
+      const data: SettingsData = {
+        ...MOCK_SETTINGS,
+        tenant: { ...MOCK_SETTINGS.tenant },
+        accounts: [...MOCK_SETTINGS.accounts],
+        metaPage: null,
+      }
       setUser(data)
       setName(data.name || "")
       setTenantName(data.tenant?.name || "")

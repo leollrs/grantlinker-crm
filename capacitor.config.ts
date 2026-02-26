@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   // Required by Capacitor; app loads remote URL in production.
   webDir: 'public',
   server: {
-    url: 'https://grantlinkercrm.vercel.app',
+    url: 'https://grantlinkercrm-ssd.vercel.app',
     cleartext: false
   }
 };
