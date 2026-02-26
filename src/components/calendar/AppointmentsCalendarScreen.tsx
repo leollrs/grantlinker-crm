@@ -53,7 +53,6 @@ export function AppointmentsCalendarScreen() {
           title: apt.title,
           startTime: apt.startTime,
           endTime: apt.endTime,
-          source: "local",
           client: apt.clientName
             ? {
                 firstName: apt.clientName.split(" ")[0] || apt.clientName,
@@ -71,7 +70,7 @@ export function AppointmentsCalendarScreen() {
     }
 
     if (status === "authenticated") {
-      fetchCalendarData()
+      void fetchCalendarData()
     }
   }, [status, router])
 
@@ -89,6 +88,7 @@ export function AppointmentsCalendarScreen() {
       setGoogleEvents(googleEventsData)
     } catch (error) {
       console.error("Failed to fetch calendar data:", error)
+      setGoogleEvents([])
     } finally {
       setLoading(false)
     }
@@ -97,24 +97,25 @@ export function AppointmentsCalendarScreen() {
   async function handleDelete(id: string) {
     if (UI_ONLY_MODE) {
       if (id.startsWith("google-")) {
-        setGoogleEvents((prev) => prev.filter((event) => event.id !== id))
+        setGoogleEvents((current) => current.filter((event) => event.id !== id))
       } else {
-        setAppointments((prev) => prev.filter((event) => event.id !== id))
+        setAppointments((current) => current.filter((event) => event.id !== id))
       }
       return
     }
 
     try {
       if (id.startsWith("google-")) {
-        console.log("Delete Google event:", id)
-      } else {
-        const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" })
-        if (res.ok) {
-          await fetchCalendarData()
-        }
+        setGoogleEvents((current) => current.filter((event) => event.id !== id))
+        return
+      }
+
+      const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" })
+      if (res.ok) {
+        await fetchCalendarData()
       }
     } catch (error) {
-      console.error("Failed to delete:", error)
+      console.error("Failed to delete appointment:", error)
     }
   }
 
@@ -137,7 +138,7 @@ export function AppointmentsCalendarScreen() {
     title: appointment.title,
     startTime: appointment.startTime,
     endTime: appointment.endTime,
-    source: "local" as const,
+    source: "local",
   }))
 
   const mobileLocalEvents: CalendarEvent[] = appointments.map((appointment) => ({
@@ -145,7 +146,7 @@ export function AppointmentsCalendarScreen() {
     title: appointment.title,
     startTime: appointment.startTime,
     endTime: appointment.endTime,
-    source: "local" as const,
+    source: "local",
     clientName: appointment.client ? `${appointment.client.firstName} ${appointment.client.lastName}` : null,
     leadName: appointment.lead ? `${appointment.lead.firstName} ${appointment.lead.lastName}` : null,
     userName: appointment.user?.name || null,
@@ -159,11 +160,11 @@ export function AppointmentsCalendarScreen() {
   const allMobileEvents = [...mobileLocalEvents, ...filteredGoogleEvents]
 
   return (
-    <div className="flex-1 min-w-0 p-5 md:p-7 lg:p-9 pt-7 pb-24 md:pb-10">
-      <div className="flex items-center justify-between mb-7">
+    <div className="page-shell">
+      <div className="page-header flex items-start justify-between gap-3 md:items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Appointments</h2>
-          <p className="text-sm text-muted-foreground mt-2 hidden md:block">
+          <h2 className="page-title">Appointments</h2>
+          <p className="page-subtitle mt-1 md:mt-2 hidden md:block">
             {googleEvents.length > 0
               ? "Showing local appointments and Google Calendar events"
               : "Manage your scheduled appointments"}

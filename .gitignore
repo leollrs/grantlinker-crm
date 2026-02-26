@@ -28,6 +28,7 @@ pnpm-debug.log*
 
 # OS / tooling
 .DS_Store
+._*
 .vercel
 
 # Capacitor / iOS (keep source, ignore build junk)
